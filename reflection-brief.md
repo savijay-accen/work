@@ -1,7 +1,7 @@
 Reflection Brief — Harness Engineering Capstone
 
 Name: Shantanu Vijay
- Date: 21-Nov-2026
+Date: 21-Nov-2026
 
 Environment
 Model(s): Claude models accessed through the Udacity/Vocareum environment (Systems 1, 2, and 4), Claude Code configuration validation for System 3.
@@ -9,6 +9,7 @@ OS / Python: Vocareum Cloud Resources workspace, Python 3.13.
 Approx. API spend: Approximately $1-$5 as indicated in the project instructions.
 Part 1 — Per-system
 System 1 — Agentic loop
+
 1. Loop control. Quote the stop_reason sequence from one trace. Name the file and function that decides continue-vs-stop, and how.
 
 → The agentic loop is driven by model-generated stop_reason values rather than fixed iteration counts. The implementation references claims_intake/loop.py, where the run loop evaluates the model response and either executes tools or terminates when the stop condition is reached. My System 1 execution processed claim fixtures through the claims intake workflow and completed successfully with all 30 tests passing. The architecture separates tool execution from termination logic so the model determines when additional work is needed instead of the application using arbitrary loop limits.
@@ -39,6 +40,7 @@ System 2 — Context strategy
 → The full evaluation achieved 6/6 passing questions. In the control variant with the case-facts block removed, Q6 failed while Q1 still passed. Q6 required the structured status token in_progress, which existed only in the case-facts section. This demonstrates that the case-facts block preserves structured information that cannot reliably be recovered from summarized or conversational text alone.
 
 System 3 — Claude Code config
+
 8. Path-scoped rules. Quote the glob frontmatter from one rule file. Why is it better than a directory-level CLAUDE.md for cross-cutting conventions?
 
 → The configuration includes dedicated rule files such as .claude/rules/api.md, .claude/rules/react.md, and .claude/rules/tests.md. Path-scoped rules allow standards to be targeted at specific technology stacks without affecting unrelated code. This is more maintainable than repeating guidance across multiple directory-specific CLAUDE.md files. The configuration was validated by a passing suite of 35 tests.
@@ -52,6 +54,7 @@ System 3 — Claude Code config
 → Project-level scope is represented by the repository-wide CLAUDE.md and the shared standards under .claude/standards/. User-level scope is represented through Claude Code configuration elements such as commands and skills that customize how work is performed. The configuration validated hierarchy management, path-scoped rules, review commands, deploy-check skills, and plan-mode documentation through 35 passing tests.
 
 System 4 — Orchestration
+
 11. Push work down. Defects the SQL query returned vs warm-tier total. Name the indexed query. Why does the model never see the full history?
 
 → The architecture uses indexed SQL queries to retrieve only relevant defects rather than materializing the entire history. Tests such as test_defects_since_uses_index_and_does_not_load_full_table and test_gather_new_defects_has_no_python_side_filtering verify this behavior. The model never sees the complete historical dataset because filtering occurs before prompt construction. This reduces token consumption and improves scalability.
@@ -65,6 +68,7 @@ System 4 — Orchestration
 → The hot state is intentionally constrained through explicit tests such as test_hotstate_roundtrip_and_size_budget and test_hotstate_rejects_more_than_20_hashes. Keeping hot state small prevents storage growth across repeated shift executions. Since the orchestrator runs indefinitely over multiple shifts, uncontrolled state growth would eventually affect performance, recovery time, and prompt size. Small state budgets ensure long-term operational stability.
 
 Part 2 — Synthesis
+
 14. Three layers. Point to a file/artifact for each layer and justify.
 
 → Model: System 2 evaluation artifacts (runs/20261120-214014/eval.jsonl) demonstrate model reasoning over assembled context.
@@ -90,6 +94,7 @@ Part 2 — Synthesis
 → System 4 has the largest operational blast radius because it influences ongoing monitoring decisions. If retrieval or state handling fails, operators could miss important defect patterns. The architecture limits impact through SQL filtering, tiered state management, recovery logic, and forked investigations. These controls reduce the likelihood that a single corrupted state file affects future shift processing.
 
 Part 3 — Honest assessment
+
 19. What broke. One thing that failed first try in your environment, and how you fixed it.
 
 → My first issue was generating evidence outputs because I initially attempted to write files from the wrong working directory. This caused missing-path and missing-README errors. I corrected the problem by navigating directly into each solution directory, reading the available project files, and using the documented execution commands before saving outputs into the submission folders.
